@@ -73,7 +73,7 @@ workflow_status:
     required: true
     workflows:
       - id: "create-architecture"
-        status: "required"
+        status: "docs/architecture.md"
         agent: "architect"
         command: "/bmad:bmm:workflows:architecture"
         output: "System architecture document"
