@@ -28,7 +28,7 @@ workflow_status:
     note: "User-selected during workflow-init"
     workflows:
       - id: "research"
-        status: "optional"
+        status: "docs/research-technical-2025-11-17.md"
         agent: "analyst"
         command: "/bmad:bmm:workflows:research"
         note: "Can have multiple research workflows"
