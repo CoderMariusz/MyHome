@@ -38,7 +38,7 @@ workflow_status:
     required: true
     workflows:
       - id: "prd"
-        status: "required"
+        status: "docs/prd.md"
         agent: "pm"
         command: "/bmad:bmm:workflows:prd"
         output: "Product Requirements Document with FRs and NFRs"
