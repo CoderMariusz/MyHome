@@ -56,7 +56,7 @@ workflow_status:
         note: "Optional: Create epic breakdown early (basic structure only)"
 
       - id: "create-design"
-        status: "conditional"
+        status: "docs/ux-design-specification.md"
         condition: "if_has_ui"
         agent: "ux-designer"
         command: "/bmad:bmm:workflows:create-ux-design"
