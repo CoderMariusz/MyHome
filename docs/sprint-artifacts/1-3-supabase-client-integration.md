@@ -1,6 +1,6 @@
 # Story 1.3: Supabase Client Integration
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
