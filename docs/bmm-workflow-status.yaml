@@ -99,7 +99,7 @@ workflow_status:
         note: "Quality check for architecture completeness"
 
       - id: "implementation-readiness"
-        status: "required"
+        status: "passed"
         agent: "architect"
         command: "/bmad:bmm:workflows:implementation-readiness"
         note: "Validates PRD + UX + Architecture + Epics + Testability cohesion before implementation"
