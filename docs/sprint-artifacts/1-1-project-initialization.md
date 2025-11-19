@@ -1,6 +1,6 @@
 # Story 1.1: Project Initialization
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
