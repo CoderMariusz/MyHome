@@ -1,6 +1,6 @@
 # Story 1.2: Supabase Project Setup
 
-Status: drafted
+Status: ready-for-dev
 
 ## Story
 
