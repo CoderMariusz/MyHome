@@ -80,7 +80,7 @@ workflow_status:
         note: "Complete system design for greenfield projects"
 
       - id: "create-epics-and-stories-final"
-        status: "required"
+        status: "docs/epics.md"
         agent: "pm"
         command: "/bmad:bmm:workflows:create-epics-and-stories"
         note: "Required: Create final epic breakdown with full context (PRD + UX + Architecture)"
