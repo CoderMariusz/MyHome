@@ -32,7 +32,7 @@ story_location: "docs/stories"
 
 development_status:
   # Epic 1: Foundation & Project Setup
-  epic-1: backlog
+  epic-1: contexted
   1-1-project-initialization: backlog
   1-2-supabase-project-setup: backlog
   1-3-supabase-client-integration: backlog
@@ -40,7 +40,7 @@ development_status:
   epic-1-retrospective: optional
 
   # Epic 2: User Authentication
-  epic-2: backlog
+  epic-2: contexted
   2-1-user-registration: backlog
   2-2-user-login: backlog
   2-3-password-reset-flow: backlog
@@ -54,7 +54,7 @@ development_status:
 # =============================================================================
 
   # Epic 3: Home Management & Onboarding
-  epic-3: backlog
+  epic-3: contexted
   3-1-onboarding-create-join-home: backlog
   3-2-view-home-members: backlog
   3-3-invite-code-display-copy: backlog
@@ -63,7 +63,7 @@ development_status:
   epic-3-retrospective: optional
 
   # Epic 4: Shopping List Core
-  epic-4: backlog
+  epic-4: contexted
   4-1-display-shopping-list: backlog
   4-2-add-shopping-item: backlog
   4-3-mark-item-purchased: backlog
@@ -78,7 +78,7 @@ development_status:
 # =============================================================================
 
   # Epic 5: Real-time Synchronization
-  epic-5: backlog
+  epic-5: contexted
   5-1-realtime-list-updates: backlog
   5-2-connection-status-indicator: backlog
   5-3-optimistic-updates: backlog
@@ -86,7 +86,7 @@ development_status:
   epic-5-retrospective: optional
 
   # Epic 6: Offline Capability
-  epic-6: backlog
+  epic-6: contexted
   6-1-offline-list-viewing: backlog
   6-2-offline-mutations-queue: backlog
   6-3-offline-indicator-sync-status: backlog
@@ -98,7 +98,7 @@ development_status:
 # =============================================================================
 
   # Epic 7: Push Notifications
-  epic-7: backlog
+  epic-7: contexted
   7-1-notification-permission-request: backlog
   7-2-subscribe-push-notifications: backlog
   7-3-send-notification-item-added-purchased: backlog
@@ -106,7 +106,7 @@ development_status:
   epic-7-retrospective: optional
 
   # Epic 8: PWA & Polish
-  epic-8: backlog
+  epic-8: contexted
   8-1-pwa-manifest-installation: backlog
   8-2-responsive-design-implementation: backlog
   8-3-accessibility-compliance: backlog
