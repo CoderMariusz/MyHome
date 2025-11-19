@@ -1,6 +1,6 @@
 # Story 1.4: Vercel Deployment Pipeline
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

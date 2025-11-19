@@ -36,7 +36,7 @@ development_status:
   1-1-project-initialization: done
   1-2-supabase-project-setup: done
   1-3-supabase-client-integration: done
-  1-4-vercel-deployment-pipeline: ready-for-dev
+  1-4-vercel-deployment-pipeline: done
   epic-1-retrospective: optional
 
   # Epic 2: User Authentication
