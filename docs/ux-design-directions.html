@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyHome - Design Directions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .directions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .direction-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .direction-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .direction-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .direction-icon {
+            font-size: 48px;
+        }
+
+        .direction-title {
+            flex: 1;
+        }
+
+        .direction-title h2 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            color: #1a1a1a;
+        }
+
+        .direction-tagline {
+            font-size: 14px;
+            color: #888;
+            font-style: italic;
+        }
+
+        .direction-section {
+            margin-bottom: 25px;
+        }
+
+        .direction-section h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .direction-section p {
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .direction-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .direction-section li {
+            padding: 8px 0 8px 24px;
+            color: #555;
+            position: relative;
+        }
+
+        .direction-section li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .color-swatch {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .color-label {
+            position: absolute;
+            bottom: -24px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .mockup-preview {
+            background: #f8f8f8;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+            border: 2px dashed #ddd;
+            text-align: center;
+            color: #888;
+            font-style: italic;
+        }
+
+        .recommendation {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+
+        .recommendation strong {
+            color: #2e7d32;
+        }
+
+        @media (max-width: 768px) {
+            .directions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 MyHome Design Directions</h1>
+        <p class="subtitle">Trzy visual approaches dla family-first collaborative app</p>
+
+        <div class="directions-grid">
+            <!-- Direction 1: Cozy Home -->
+            <div class="direction-card">
+                <div class="direction-header">
+                    <div class="direction-icon">🏡</div>
+                    <div class="direction-title">
+                        <h2>Cozy Home</h2>
+                        <p class="direction-tagline">"Like a warm, well-organized kitchen"</p>
+                    </div>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Visual Identity</h3>
+                    <p>Ciepłe, przytulne kolory przypominające dom - beże, soft greens, wood tones. Rounded corners, gentle shadows, organic shapes.</p>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Typography</h3>
+                    <p><strong>Primary:</strong> Rounded sans-serif (Inter Rounded, DM Sans)<br>
+                    <strong>Size:</strong> 16-18px base (readable dla wszystkich age groups)</p>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Color Palette</h3>
+                    <div class="color-palette">
+                        <div class="color-swatch" style="background: #8D6E63;">
+                            <div class="color-label">Warm Brown</div>
+                        </div>
+                        <div class="color-swatch" style="background: #66BB6A;">
+                            <div class="color-label">Fresh Green</div>
+                        </div>
+                        <div class="color-swatch" style="background: #FFF8E1;">
+                            <div class="color-label">Cream</div>
+                        </div>
+                        <div class="color-swatch" style="background: #FF8A65;">
+                            <div class="color-label">Soft Orange</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Strengths</h3>
+                    <ul>
+                        <li>Bardzo family-friendly, accessible dla older adults</li>
+                        <li>Evokes comfort i trust (home-like feeling)</li>
+                        <li>Differentiated od corporate apps</li>
+                        <li>Ciepłe kolory reduce stress</li>
+                    </ul>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Considerations</h3>
+                    <ul>
+                        <li>Może czuć się "stary" dla younger millennials/Gen Z</li>
+                        <li>Ryzyko zbyt "crafty" - musi balansować professionalism</li>
+                        <li>Trudniejsze do skalowania do business features (Phase 2+)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Direction 2: Modern Minimalist -->
+            <div class="direction-card">
+                <div class="direction-header">
+                    <div class="direction-icon">✨</div>
+                    <div class="direction-title">
+                        <h2>Modern Minimalist</h2>
+                        <p class="direction-tagline">"Clean, fast, trustworthy"</p>
+                    </div>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Visual Identity</h3>
+                    <p>Crisp whites, blues, grays z accent colors. Sharp typography, generous whitespace, clear hierarchy. Modern app aesthetic.</p>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Typography</h3>
+                    <p><strong>Primary:</strong> Clean sans-serif (Inter, SF Pro, Roboto)<br>
+                    <strong>Size:</strong> 16px base, strong type scale dla hierarchy</p>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Color Palette</h3>
+                    <div class="color-palette">
+                        <div class="color-swatch" style="background: #1976D2;">
+                            <div class="color-label">Trust Blue</div>
+                        </div>
+                        <div class="color-swatch" style="background: #43A047;">
+                            <div class="color-label">Action Green</div>
+                        </div>
+                        <div class="color-swatch" style="background: #FFFFFF; border: 1px solid #ddd;">
+                            <div class="color-label">Pure White</div>
+                        </div>
+                        <div class="color-swatch" style="background: #263238;">
+                            <div class="color-label">Charcoal</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Strengths</h3>
+                    <ul>
+                        <li>Feels fast i professional - reinforces reliability</li>
+                        <li>Scales well to wszystkich features (shopping → finanse)</li>
+                        <li>High accessibility (clear contrast, readable)</li>
+                        <li>Familiar patterns - lower learning curve</li>
+                    </ul>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Considerations</h3>
+                    <ul>
+                        <li>Może czuć się "cold" - not family-warm</li>
+                        <li>Generic - podobne do wielu apps (less memorable)</li>
+                        <li>Ryzyko "enterprise" vibe if not balanced</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Direction 3: Friendly Balance (RECOMMENDED) -->
+            <div class="direction-card" style="border: 3px solid #4CAF50;">
+                <div class="direction-header">
+                    <div class="direction-icon">🌟</div>
+                    <div class="direction-title">
+                        <h2>Friendly Balance</h2>
+                        <p class="direction-tagline">"Modern + approachable + trustworthy"</p>
+                    </div>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Visual Identity</h3>
+                    <p>Balanced approach: clean modern foundation z warm accents. Soft blues/teals + warm neutrals. Rounded but not overly soft. Professional yet approachable.</p>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Typography</h3>
+                    <p><strong>Primary:</strong> Humanist sans-serif (Inter, Open Sans)<br>
+                    <strong>Accent:</strong> Slightly rounded dla headings (optional)<br>
+                    <strong>Size:</strong> 16-17px base, comfortable dla all ages</p>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Color Palette</h3>
+                    <div class="color-palette">
+                        <div class="color-swatch" style="background: #0288D1;">
+                            <div class="color-label">Sky Blue</div>
+                        </div>
+                        <div class="color-swatch" style="background: #66BB6A;">
+                            <div class="color-label">Fresh Green</div>
+                        </div>
+                        <div class="color-swatch" style="background: #F5F5F5;">
+                            <div class="color-label">Soft Gray</div>
+                        </div>
+                        <div class="color-swatch" style="background: #FF7043;">
+                            <div class="color-label">Warm Accent</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Strengths</h3>
+                    <ul>
+                        <li>Best of both: modern + warm</li>
+                        <li>Appeals to broad age range (parents, young adults, older)</li>
+                        <li>Trustworthy yet friendly - perfect dla family data</li>
+                        <li>Scalable - supports growth features gracefully</li>
+                        <li>Balances professionalism z approachability</li>
+                    </ul>
+                </div>
+
+                <div class="direction-section">
+                    <h3>Why Recommended dla MyHome</h3>
+                    <ul>
+                        <li><strong>Family diversity:</strong> Appeals to młodzi rodzice AND dziadkowie</li>
+                        <li><strong>Trustworthy:</strong> Handles family data - must feel secure</li>
+                        <li><strong>Differentiated:</strong> Not generic app, not childish craft</li>
+                        <li><strong>Phase 2 ready:</strong> Scales od shopping → finances smoothly</li>
+                    </ul>
+                </div>
+
+                <div class="recommendation">
+                    <strong>🎯 Recommendation:</strong> Friendly Balance direction best captures MyHome's value proposition - eliminating app fatigue przez trustworthy, family-friendly consolidated hub. Balansuje modern professionalism z warm approachability.
+                </div>
+            </div>
+        </div>
+
+        <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <h2 style="margin-bottom: 20px; color: #1a1a1a;">🚀 Next Steps</h2>
+            <p style="color: #555; margin-bottom: 15px;">Based on <strong>Friendly Balance</strong> direction, będziemy tworzyć:</p>
+            <ol style="color: #555; padding-left: 20px;">
+                <li style="margin-bottom: 10px;"><strong>Refined Color Themes:</strong> 3 variations of Friendly Balance palette</li>
+                <li style="margin-bottom: 10px;"><strong>Component Library:</strong> Buttons, inputs, cards, navigation z chosen direction</li>
+                <li style="margin-bottom: 10px;"><strong>Key Screen Wireframes:</strong> Shopping list, home setup, notifications</li>
+                <li style="margin-bottom: 10px;"><strong>Interactive Prototypes:</strong> Flow demonstrations dla core features</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
