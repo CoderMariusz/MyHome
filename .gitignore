@@ -1,0 +1,39 @@
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# MCP config (contains tokens)
+.mcp.json
+
+# Node (if used)
+node_modules/
+
+# Migration artifacts (project-specific, not part of pack)
+.claude/migration/AUDIT-REPORT.md
+.claude/migration/FILE-MAP.md
+.claude/migration/MIGRATION-REPORT.md
+.claude/migration/*.tmp
+
+# Agent workspaces (generated per-project)
+.claude/state/workspaces/
+
+# Logs
+*.log
