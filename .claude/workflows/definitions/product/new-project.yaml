@@ -1,0 +1,325 @@
+# New Project Workflow
+# Full project setup from idea to sprint-ready state
+#
+# Documentation: @.claude/workflows/documentation/DISCOVERY-FLOW.md
+#                @.claude/workflows/documentation/EPIC-WORKFLOW.md
+
+name: new-project
+description: Complete workflow for new project initialization
+trigger: "new_project | major_feature | greenfield"
+
+# Expected duration: Multiple sessions
+# Parallelization: Limited (sequential dependencies)
+
+steps:
+  - id: discovery
+    agent: DISCOVERY-AGENT
+    type: new_project
+    depth: deep                  # Full discovery for new projects
+    description: "Gather requirements through structured interview"
+    input:
+      context_refs:
+        - "@CLAUDE.md"
+        - "@docs/1-BASELINE/product/project-brief.md"
+    output:
+      deliverable: "docs/0-DISCOVERY/PROJECT-UNDERSTANDING.md"
+      min_clarity: 60            # Min to proceed, but agent targets 85%
+    checkpoint:
+      - "Business context documented"
+      - "User personas identified"
+      - "Scope boundaries defined"
+    gate:
+      id: DISCOVERY_COMPLETE
+      type: quality_gate
+      enforcer: DISCOVERY-AGENT
+      criteria:
+        - "Requirements clarity score >= 70%"
+        - "Key stakeholders interviewed"
+        - "Business context documented"
+        - "User personas identified"
+        - "Scope boundaries defined"
+      on_pass: prd_creation
+      on_fail:
+        action: ask_user
+        message: "Clarification needed on requirements"
+      block_message: |
+        Cannot proceed to PRD Creation:
+        - Requirements clarity: {clarity_score}% (need >= 70%)
+        - Stakeholders interviewed: {stakeholders_interviewed}
+        - Complete discovery interview before proceeding
+    next: prd_creation
+    on_blocked: ask_user
+
+  - id: prd_creation
+    agent: PM-AGENT
+    type: create_prd
+    description: "Create Product Requirements Document"
+    input:
+      context_refs:
+        - "@docs/0-DISCOVERY/PROJECT-UNDERSTANDING.md"
+    output:
+      deliverable: "docs/1-BASELINE/product/prd.md"
+    checkpoint:
+      - "All requirements have MoSCoW priority"
+      - "Success metrics are SMART"
+      - "Scope is explicit (in/out/future)"
+    gate:
+      id: PRD_APPROVED
+      type: approval_gate
+      enforcer: PM-AGENT + PRODUCT-OWNER
+      criteria:
+        - "PRD document complete"
+        - "All requirements have MoSCoW priority"
+        - "Success metrics are SMART"
+        - "Scope validated (in/out/future explicit)"
+        - "Stakeholder sign-off obtained"
+      on_pass: architecture
+      on_fail:
+        action: return_to_phase
+        target: discovery
+        message: "PRD incomplete or not approved"
+      block_message: |
+        Cannot proceed to Architecture:
+        - PRD complete: {prd_complete}
+        - Requirements prioritized: {requirements_prioritized}
+        - Scope validated: {scope_validated}
+        - PRD must be approved by PM and Product Owner
+    next: architecture
+    on_blocked: return_to_discovery
+
+  - id: architecture
+    agent: ARCHITECT-AGENT
+    type: full_design
+    description: "Design architecture and break into epics/stories"
+    input:
+      context_refs:
+        - "@docs/1-BASELINE/product/prd.md"
+    output:
+      deliverables:
+        - "docs/1-BASELINE/architecture/system-overview.md"
+        - "docs/2-MANAGEMENT/epics/epic-01-*.md"
+    checkpoint:
+      - "All PRD requirements mapped to stories"
+      - "ADRs created for major decisions"
+      - "Dependencies mapped"
+    gate:
+      id: ARCHITECTURE_APPROVED
+      type: review_gate
+      enforcer: ARCHITECT-AGENT
+      criteria:
+        - "System design complete"
+        - "All PRD requirements mapped to stories"
+        - "ADRs documented for major decisions"
+        - "Dependencies mapped"
+        - "Technical feasibility confirmed"
+      on_pass: scope_validation
+      on_fail:
+        action: return_to_phase
+        target: prd_creation
+        message: "Architecture design incomplete or infeasible"
+      block_message: |
+        Cannot proceed to Story Breakdown:
+        - System design complete: {system_design_complete}
+        - Requirements mapped: {requirements_mapped}
+        - ADRs documented: {adrs_count} ADRs created
+        - Architecture must be complete before story breakdown
+    next: scope_validation
+    on_blocked: return_to_pm
+
+  - id: scope_validation
+    agent: PRODUCT-OWNER
+    type: scope_review
+    description: "Validate scope and INVEST compliance"
+    input:
+      context_refs:
+        - "@docs/1-BASELINE/product/prd.md"
+        - "@docs/2-MANAGEMENT/epics/epic-01-*.md"
+    output:
+      deliverable: "docs/2-MANAGEMENT/reviews/scope-review-epic-01.md"
+    checkpoint:
+      - "All stories pass INVEST"
+      - "No scope creep detected"
+      - "AC are testable"
+    gate:
+      id: STORIES_READY
+      type: approval_gate
+      enforcer: PRODUCT-OWNER
+      criteria:
+        - "All stories pass INVEST compliance"
+        - "Acceptance criteria defined for all stories"
+        - "No scope creep detected"
+        - "AC are testable"
+        - "Story estimates provided"
+      on_pass: sprint_planning
+      on_fail:
+        action: return_to_phase
+        target: architecture
+        message: "Stories do not meet INVEST criteria"
+      block_message: |
+        Cannot proceed to Sprint Planning:
+        - Stories INVEST compliant: {invest_pass_count}/{total_stories}
+        - AC defined: {ac_defined_count}/{total_stories}
+        - Scope validated: {scope_validated}
+        - All stories must be sprint-ready before planning
+    decision:
+      approved: sprint_planning
+      needs_revision: return_to_architect
+    on_blocked: ask_user
+
+  - id: sprint_planning
+    agent: SCRUM-MASTER
+    type: sprint_planning
+    description: "Plan first sprint"
+    input:
+      context_refs:
+        - "@docs/2-MANAGEMENT/epics/epic-01-*.md"
+        - "@docs/2-MANAGEMENT/reviews/scope-review-epic-01.md"
+    output:
+      deliverable: "docs/2-MANAGEMENT/sprints/sprint-01-plan.md"
+    checkpoint:
+      - "Capacity not exceeded"
+      - "Dependencies respected"
+      - "Stories have estimates"
+    gate:
+      id: SPRINT_PLANNED
+      type: quality_gate
+      enforcer: SCRUM-MASTER
+      criteria:
+        - "Sprint backlog defined"
+        - "Capacity allocated and not exceeded"
+        - "Dependencies respected in ordering"
+        - "All stories have estimates"
+        - "Sprint goal defined"
+      on_pass: complete
+      on_fail:
+        action: return_to_phase
+        target: scope_validation
+        message: "Sprint planning incomplete"
+      block_message: |
+        Cannot start Sprint:
+        - Sprint backlog defined: {backlog_defined}
+        - Capacity: {capacity_used}/{capacity_available}
+        - Dependencies valid: {dependencies_valid}
+        - Sprint planning must be complete before development
+    next: complete
+
+  - id: complete
+    type: workflow_complete
+    summary: "Project ready for development"
+    next_workflow: "engineering/story-delivery.yaml"
+
+# =============================================================================
+# QUALITY GATES SUMMARY
+# =============================================================================
+quality_gates:
+  # Discovery phase gate
+  DISCOVERY_COMPLETE:
+    phase: discovery
+    enforcer: DISCOVERY-AGENT
+    blocker: "Cannot proceed to PRD creation"
+    criteria:
+      - "Requirements clarity >= 70%"
+      - "Stakeholders interviewed"
+      - "Business context documented"
+
+  # PRD phase gate
+  PRD_APPROVED:
+    phase: prd_creation
+    enforcer: PM-AGENT + PRODUCT-OWNER
+    blocker: "Cannot proceed to architecture"
+    criteria:
+      - "PRD document complete"
+      - "Requirements prioritized (MoSCoW)"
+      - "Scope validated"
+
+  # Architecture phase gate
+  ARCHITECTURE_APPROVED:
+    phase: architecture
+    enforcer: ARCHITECT-AGENT
+    blocker: "Cannot proceed to story breakdown"
+    criteria:
+      - "System design complete"
+      - "ADRs documented"
+      - "Dependencies mapped"
+
+  # Story validation gate
+  STORIES_READY:
+    phase: scope_validation
+    enforcer: PRODUCT-OWNER
+    blocker: "Cannot proceed to sprint planning"
+    criteria:
+      - "All stories INVEST compliant"
+      - "Acceptance criteria defined"
+      - "Estimates provided"
+
+  # Sprint planning gate
+  SPRINT_PLANNED:
+    phase: sprint_planning
+    enforcer: SCRUM-MASTER
+    blocker: "Cannot start development sprint"
+    criteria:
+      - "Sprint backlog defined"
+      - "Capacity allocated"
+      - "Dependencies respected"
+
+# =============================================================================
+# ERROR HANDLING
+# =============================================================================
+on_error:
+  log_to: "@.claude/logs/workflows/"
+  retry_count: 1
+  escalation:
+    discovery: PM-AGENT
+    prd_creation: PRODUCT-OWNER
+    architecture: SENIOR-DEV
+    scope_validation: ARCHITECT-AGENT
+    sprint_planning: PRODUCT-OWNER
+
+# =============================================================================
+# ERROR RECOVERY
+# =============================================================================
+error_recovery:
+  discovery_incomplete:
+    actions:
+      - "Request additional stakeholder input"
+      - "Clarify ambiguous requirements"
+      - "Document assumptions"
+    if_still_blocked:
+      - "Escalate to product-owner"
+      - "Schedule discovery session"
+
+  prd_rejected:
+    actions:
+      - "Review feedback from product-owner"
+      - "Revise PRD sections"
+      - "Clarify scope boundaries"
+    if_still_blocked:
+      - "Return to discovery phase"
+      - "Re-interview stakeholders"
+
+  architecture_infeasible:
+    actions:
+      - "Review technical constraints"
+      - "Propose alternative approaches"
+      - "Create ADR for decision"
+    if_still_blocked:
+      - "Escalate to senior-dev"
+      - "May require PRD scope adjustment"
+
+  stories_not_invest:
+    actions:
+      - "Refine story granularity"
+      - "Add missing acceptance criteria"
+      - "Validate testability"
+    if_still_blocked:
+      - "Return to architecture phase"
+      - "Review story breakdown approach"
+
+  capacity_exceeded:
+    actions:
+      - "Reprioritize sprint backlog"
+      - "Move stories to next sprint"
+      - "Adjust velocity assumptions"
+    if_still_blocked:
+      - "Escalate to product-owner for prioritization"
+      - "Consider scope reduction"

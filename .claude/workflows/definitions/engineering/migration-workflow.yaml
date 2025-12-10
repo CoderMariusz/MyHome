@@ -1,0 +1,643 @@
+# Migration Workflow
+# Migrate existing projects to Agent Methodology Pack
+#
+# Documentation: @.claude/workflows/documentation/MIGRATION-WORKFLOW.md
+
+name: migration-workflow
+description: Complete workflow for migrating existing projects to Agent Methodology Pack
+trigger: "migration | onboarding | methodology_setup"
+
+# Expected duration: 4 hours (small) to 3 days (large)
+# Handles discovery, planning, execution, and verification
+
+documentation: "@.claude/workflows/documentation/MIGRATION-WORKFLOW.md"
+
+# Migration strategies based on project size
+strategies:
+  auto:
+    when: "Small projects (<50 files), simple structure"
+    duration: "4-6 hours"
+    pros: "Fast, consistent"
+    cons: "Less control"
+
+  manual:
+    when: "Large projects (>200 files), complex structure"
+    duration: "2-3 days"
+    pros: "Full control, customized"
+    cons: "Time-consuming"
+
+  hybrid:
+    when: "Medium projects (50-200 files)"
+    duration: "1-2 days"
+    pros: "Balanced speed and control"
+    cons: "Requires decision-making"
+
+phases:
+  # Phase 1: Discovery
+  - id: discovery
+    name: "Discovery"
+    duration: "30-45 minutes"
+    steps:
+      - id: project_scan
+        agent: DOC-AUDITOR
+        model: sonnet
+        duration: "30 minutes"
+        activities:
+          - "Scan entire project directory"
+          - "Inventory all documentation files"
+          - "Identify large files (>500 lines)"
+          - "Detect orphaned documentation"
+          - "Analyze tech stack from code"
+          - "Map existing documentation structure"
+          - "Identify potential issues"
+          - "Flag context gaps for interview"
+        output:
+          deliverables:
+            - "AUDIT-REPORT.md"
+        checkpoint:
+          - "All project files scanned"
+          - "Large files identified"
+          - "Tech stack detected"
+          - "Issues documented"
+
+      - id: context_interview
+        agent: DISCOVERY-AGENT
+        model: sonnet
+        duration: "5-15 minutes"
+        condition: "scan.has_gaps OR scan.missing_context"
+        skip_if: "complete_docs_found OR --skip-interview"
+        config:
+          depth: quick
+          max_questions: 7
+        focus:
+          - "Main goal of migration"
+          - "Areas NOT to touch"
+          - "Current pain points"
+          - "Critical files/features"
+          - "Recent changes"
+          - "Contact for questions"
+          - "Priority order"
+        output:
+          deliverables:
+            - "docs/0-DISCOVERY/MIGRATION-CONTEXT.md"
+
+    gate:
+      id: DISCOVERY_COMPLETE
+      type: quality_gate
+      enforcer: DOC-AUDITOR
+      criteria:
+        - "All project files scanned"
+        - "Large files identified (>500 lines)"
+        - "Tech stack detected from code"
+        - "Issues and gaps documented"
+        - "AUDIT-REPORT.md generated"
+        - "Migration strategy recommended"
+      on_pass: planning
+      on_fail:
+        action: return_to_phase
+        target: discovery.project_scan
+      block_message: |
+        [STOP] Cannot proceed to PLANNING:
+        - Files scanned: [count/total]
+        - Large files identified: [yes/no]
+        - Tech stack: [detected/missing]
+        - Issues documented: [yes/no]
+        - AUDIT-REPORT.md: [exists/missing]
+        - Strategy: [recommended/pending]
+
+    gate_interview:
+      id: INTERVIEW_COMPLETE
+      type: quality_gate
+      enforcer: DISCOVERY-AGENT
+      condition: "context_interview executed"
+      criteria:
+        - "All context gaps addressed"
+        - "Migration goals documented"
+        - "Critical files identified"
+        - "MIGRATION-CONTEXT.md generated"
+      on_pass: planning
+      on_fail:
+        action: retry
+        max_retries: 2
+      block_message: |
+        [STOP] Interview incomplete:
+        - Context gaps: [addressed/remaining]
+        - Goals documented: [yes/no]
+        - Critical files: [identified/missing]
+
+  # Phase 2: Planning
+  - id: planning
+    name: "Planning"
+    duration: "1 hour"
+    steps:
+      - id: review_strategy
+        agent: ORCHESTRATOR
+        model: opus
+        duration: "30 minutes"
+        activities:
+          - "Review AUDIT-REPORT.md"
+          - "Assess migration complexity"
+          - "Choose migration strategy"
+          - "Identify risks and dependencies"
+          - "Create high-level migration plan"
+        complexity_assessment:
+          small: "<50 files, simple structure, AUTO strategy"
+          medium: "50-200 files, moderate structure, HYBRID strategy"
+          large: ">200 files, complex structure, MANUAL strategy"
+
+      - id: detailed_planning
+        agent: SCRUM-MASTER
+        model: sonnet
+        duration: "30 minutes"
+        activities:
+          - "Break down migration into tasks"
+          - "Prioritize tasks using MoSCoW"
+          - "Estimate time for each task"
+          - "Identify parallel work opportunities"
+          - "Create migration timeline"
+          - "Define success criteria"
+          - "Plan rollback strategy"
+        output:
+          deliverables:
+            - "MIGRATION-PLAN.md"
+
+    gate:
+      id: PLANNING_COMPLETE
+      type: approval_gate
+      enforcer: ARCHITECT-AGENT
+      criteria:
+        - "Strategy chosen and justified"
+        - "Tasks broken down and estimated"
+        - "Timeline is realistic"
+        - "Risks identified with mitigations"
+        - "Rollback plan defined"
+        - "Backup created before execution"
+      on_pass: execution
+      on_fail:
+        action: return_to_phase
+        target: planning.detailed_planning
+      block_message: |
+        [STOP] Cannot proceed to EXECUTION:
+        - Strategy justified: [yes/no]
+        - Tasks estimated: [count] tasks defined
+        - Timeline: [realistic/needs-review]
+        - Risks mitigated: [yes/no]
+        - Rollback plan: [defined/missing]
+        - Backup: [created/missing]
+
+    gate_execution_ready:
+      id: EXECUTION_READY
+      type: quality_gate
+      enforcer: SCRUM-MASTER
+      criteria:
+        - "MIGRATION-PLAN.md reviewed and approved"
+        - "All stakeholders notified"
+        - "Resources allocated"
+        - "Backup verified"
+      on_pass: execution
+      on_fail:
+        action: escalate
+        escalate_to: ORCHESTRATOR
+      block_message: |
+        [STOP] Not ready for EXECUTION:
+        - Plan approved: [yes/no]
+        - Stakeholders notified: [yes/no]
+        - Resources: [allocated/pending]
+        - Backup verified: [yes/no]
+
+  # Phase 3: Execution
+  - id: execution
+    name: "Execution"
+    duration: "1-3 days"
+    steps:
+      - id: setup_structure
+        agent: TECH-WRITER
+        model: sonnet
+        duration: "2 hours"
+        activities:
+          - "Create .claude/ directory structure"
+          - "Copy agent definitions"
+          - "Copy workflow files"
+          - "Create state files"
+          - "Setup docs/ directory structure"
+        checkpoint:
+          - "All directories created"
+          - "Agent files copied"
+          - "Workflow files copied"
+          - "State files created"
+
+      - id: create_core_files
+        agent: TECH-WRITER
+        model: sonnet
+        duration: "1 hour"
+        activities:
+          - "Generate CLAUDE.md (<70 lines)"
+          - "Create PROJECT-STATE.md"
+          - "Initialize state files"
+          - "Create README updates"
+        checkpoint:
+          - "CLAUDE.md exists"
+          - "CLAUDE.md < 70 lines"
+          - "PROJECT-STATE.md exists"
+          - "All state files initialized"
+
+      - id: migrate_documentation
+        agent: TECH-WRITER
+        model: sonnet
+        duration: "4-8 hours"
+        activities:
+          - "Map existing docs to standard documentation structure"
+          - "Move/copy files to appropriate locations"
+          - "Create missing baseline docs"
+          - "Update cross-references"
+          - "Archive old docs"
+        docs_mapping:
+          "1-BASELINE": "Requirements & Design"
+          "2-MANAGEMENT": "Epics & Sprints"
+          "3-IMPLEMENTATION": "Code & Tests"
+          "4-RELEASE": "Deployment & Docs"
+        checkpoint:
+          - "All docs mapped to documentation structure"
+          - "Files moved to new locations"
+          - "Missing baseline docs created"
+          - "All cross-references updated"
+
+      - id: shard_large_files
+        agent: TECH-WRITER
+        model: sonnet
+        duration: "2-4 hours"
+        condition: "large_files_exist"
+        for_each: "file > 500 lines"
+        activities:
+          - "Analyze file structure"
+          - "Identify logical sections"
+          - "Split into smaller modules"
+          - "Create index/overview file"
+          - "Update references"
+        checkpoint:
+          - "File analyzed and sections identified"
+          - "Split into modules < 500 lines each"
+          - "Index file created"
+          - "References updated"
+
+      - id: generate_workspaces
+        agent: ARCHITECT-AGENT
+        model: opus
+        duration: "1 hour"
+        activities:
+          - "Analyze project architecture"
+          - "Create agent workspace definitions"
+          - "Map files to agent responsibilities"
+          - "Define context loading strategies"
+        output:
+          deliverables:
+            - ".claude/agents/workspaces/*.md"
+        checkpoint:
+          - "Project architecture analyzed"
+          - "All major agents have workspace definitions"
+          - "File-to-agent mapping complete"
+          - "Context loading strategies defined"
+
+      - id: infrastructure_setup
+        agent: DEVOPS-AGENT
+        model: sonnet
+        duration: "2-4 hours"
+        condition: "project_has_deployment_needs == true"
+        activities:
+          - "Analyze existing CI/CD configuration"
+          - "Migrate or create CI/CD pipeline"
+          - "Setup deployment configurations"
+          - "Configure environment variables"
+          - "Setup Docker/container configs if needed"
+          - "Configure security scanning"
+        output:
+          deliverables:
+            - ".github/workflows/"
+            - "Dockerfile"
+            - "docker-compose.yml"
+            - "docs/deployment/deployment-guide.md"
+        checkpoint:
+          - "CI/CD pipeline configured"
+          - "Deployment configs migrated"
+          - "Environment setup documented"
+          - "No hardcoded secrets"
+
+    gate_infrastructure:
+      id: INFRASTRUCTURE_CONFIGURED
+      type: quality_gate
+      enforcer: DEVOPS-AGENT
+      condition: "infrastructure_setup executed"
+      criteria:
+        - "CI/CD pipeline configured and valid"
+        - "Deployment configurations migrated"
+        - "Environment variables documented"
+        - "No hardcoded secrets detected"
+        - "Security scanning enabled"
+      on_pass: verification
+      on_fail:
+        action: return_to_phase
+        target: execution.infrastructure_setup
+      block_message: |
+        [STOP] Infrastructure not ready:
+        - CI/CD pipeline: [configured/missing]
+        - Deployment configs: [migrated/pending]
+        - Env vars documented: [yes/no]
+        - Secrets check: [passed/failed]
+        - Security scanning: [enabled/disabled]
+
+    gate_execution:
+      id: MIGRATION_EXECUTED
+      type: quality_gate
+      enforcer: ORCHESTRATOR
+      criteria:
+        - ".claude/ directory structure complete"
+        - "Core files created (CLAUDE.md, PROJECT-STATE.md)"
+        - "Documentation migrated to docs/ structure"
+        - "Large files sharded (<500 lines each)"
+        - "Agent workspaces defined"
+        - "Infrastructure configured (if applicable)"
+      on_pass: verification
+      on_fail:
+        action: return_to_phase
+        target: execution.setup_structure
+      block_message: |
+        [STOP] Cannot proceed to VERIFICATION:
+        - .claude/ structure: [complete/incomplete]
+        - Core files: [created/missing]
+        - Docs migrated: [yes/no]
+        - Files sharded: [yes/no]
+        - Workspaces defined: [yes/no]
+        - Infrastructure: [configured/N/A/pending]
+
+  # Phase 4: Verification
+  - id: verification
+    name: "Verification"
+    duration: "30 minutes"
+    steps:
+      - id: validation_script
+        duration: "15 minutes"
+        command: "bash scripts/validate-migration.sh"
+        checks:
+          structure:
+            - ".claude/ directory exists"
+            - ".claude/agents/ subdirectories present"
+            - ".claude/workflows/ files present"
+            - ".claude/state/ files present"
+            - "docs/ structure present"
+          files:
+            - "CLAUDE.md exists"
+            - "CLAUDE.md < 70 lines"
+            - "PROJECT-STATE.md exists"
+            - "All agent definitions present"
+          content:
+            - "All @references valid"
+            - "No broken links"
+            - "No files > 500 lines (or properly sharded)"
+
+      - id: test_agent_loading
+        duration: "15 minutes"
+        verify:
+          - "All agents can load their definitions"
+          - "@references resolve correctly"
+          - "Context stays within budget"
+          - "No errors or warnings"
+
+      - id: deployment_validation
+        agent: DEVOPS-AGENT
+        model: sonnet
+        duration: "15-30 minutes"
+        condition: "infrastructure_setup_completed == true"
+        activities:
+          - "Validate CI/CD pipeline syntax"
+          - "Test pipeline in dry-run mode"
+          - "Verify deployment configurations"
+          - "Check security scan setup"
+          - "Verify rollback capability"
+        checkpoint:
+          - "Pipeline syntax valid"
+          - "Deployment configs correct"
+          - "Security scanning enabled"
+          - "Rollback procedure documented"
+
+    gate:
+      id: VERIFICATION_PASSED
+      type: quality_gate
+      enforcer: DOC-AUDITOR
+      criteria:
+        - "All validation checks pass"
+        - "All agents can load their definitions"
+        - "All @references resolve correctly"
+        - "CLAUDE.md < 70 lines"
+        - "No orphaned files"
+        - "Context budget stays within limits"
+        - "Workflows tested and functional"
+        - "Team can use methodology"
+      on_pass: complete
+      on_fail:
+        action: return_to_phase
+        target: verification.validation_script
+      block_message: |
+        [STOP] Verification FAILED:
+        - Validation checks: [passed/failed]
+        - Agent loading: [all pass/X failures]
+        - @references: [valid/X broken]
+        - CLAUDE.md: [X lines - OK/exceeds 70]
+        - Orphaned files: [none/X found]
+        - Context budget: [OK/exceeded]
+        - Workflows: [tested/untested]
+        - Team ready: [yes/no]
+
+    gate_deployment:
+      id: DEPLOYMENT_VALIDATED
+      type: quality_gate
+      enforcer: DEVOPS-AGENT
+      condition: "deployment_validation executed"
+      criteria:
+        - "CI/CD pipeline syntax valid"
+        - "Pipeline dry-run successful"
+        - "Deployment configs verified"
+        - "Security scanning confirmed"
+        - "Rollback procedure documented"
+      on_pass: complete
+      on_fail:
+        action: return_to_phase
+        target: verification.deployment_validation
+      block_message: |
+        [STOP] Deployment verification FAILED:
+        - Pipeline syntax: [valid/invalid]
+        - Dry-run: [passed/failed]
+        - Configs: [verified/issues found]
+        - Security scan: [enabled/disabled]
+        - Rollback: [documented/missing]
+
+  # Completion
+  - id: complete
+    type: migration_complete
+    summary: "Migration to Agent Methodology Pack complete"
+    actions:
+      - "Update PROJECT-STATE.md to Ready for Development"
+      - "Archive migration artifacts"
+      - "Update team documentation"
+    next_workflow:
+      options:
+        - workflow: "engineering/epic-workflow.yaml"
+          description: "Start first epic"
+        - workflow: "engineering/sprint-workflow.yaml"
+          description: "Define first sprint"
+
+# Rollback Procedures
+rollback:
+  phase_3_issues:
+    steps:
+      - "STOP migration immediately"
+      - "Document what went wrong"
+      - "Revert to backup"
+      - "Review issue"
+      - "Adjust MIGRATION-PLAN.md"
+      - "Re-attempt with fixes"
+
+  phase_4_validation_fails:
+    steps:
+      - "Identify specific failures"
+      - "Fix issues in place (if minor)"
+      - "Re-run validation"
+      - "If major: revert, adjust plan, re-execute"
+
+  emergency:
+    commands:
+      - "git checkout main"
+      - "git branch -D feature/agent-methodology-migration"
+      - "rm -rf .claude/"
+      - "cp -r backup/. ."
+
+# Error handling
+on_error:
+  log_to: "@.claude/logs/workflows/"
+  retry_count: 1
+  escalate_to: ORCHESTRATOR
+
+error_recovery:
+  claude_md_exceeds_70_lines:
+    action: "Extract verbose sections to referenced files"
+
+  broken_references:
+    action: "Run reference validation, fix paths"
+
+  large_file_not_sharded:
+    action: "Re-analyze and re-split file"
+
+  agent_cannot_load:
+    action: "Check workspace definition and @references"
+
+  infrastructure_migration_failed:
+    action: "Review existing configs, adjust migration approach"
+    agent: DEVOPS-AGENT
+
+  pipeline_validation_failed:
+    action: "Fix pipeline syntax, revalidate"
+    agent: DEVOPS-AGENT
+
+# =============================================================================
+# QUALITY GATES SUMMARY
+# =============================================================================
+quality_gates:
+  # Discovery Phase Gates
+  DISCOVERY_COMPLETE:
+    phase: discovery
+    enforcer: DOC-AUDITOR
+    blocker: "Cannot proceed to planning"
+  INTERVIEW_COMPLETE:
+    phase: discovery
+    enforcer: DISCOVERY-AGENT
+    optional: true
+    blocker: "Context gaps remain"
+
+  # Planning Phase Gates
+  PLANNING_COMPLETE:
+    phase: planning
+    enforcer: ARCHITECT-AGENT
+    blocker: "Cannot proceed to execution"
+  EXECUTION_READY:
+    phase: planning
+    enforcer: SCRUM-MASTER
+    blocker: "Not ready for execution"
+
+  # Execution Phase Gates
+  INFRASTRUCTURE_CONFIGURED:
+    phase: execution
+    enforcer: DEVOPS-AGENT
+    optional: true
+    blocker: "Infrastructure not ready"
+  MIGRATION_EXECUTED:
+    phase: execution
+    enforcer: ORCHESTRATOR
+    blocker: "Cannot proceed to verification"
+
+  # Verification Phase Gates
+  VERIFICATION_PASSED:
+    phase: verification
+    enforcer: DOC-AUDITOR
+    blocker: "Migration not complete"
+  DEPLOYMENT_VALIDATED:
+    phase: verification
+    enforcer: DEVOPS-AGENT
+    optional: true
+    blocker: "Deployment not validated"
+
+# Metrics
+metrics:
+  track:
+    - discovery_duration
+    - planning_duration
+    - structure_setup_time
+    - core_files_time
+    - doc_migration_time
+    - sharding_time
+    - workspace_time
+    - infrastructure_time
+    - deployment_validation_time
+    - validation_time
+    - total_migration_time
+    - files_migrated
+    - files_sharded
+    - issues_found
+    - issues_fixed
+  store_in: "@.claude/state/METRICS.md"
+
+# Artifacts
+artifacts:
+  audit_report:
+    path: "AUDIT-REPORT.md"
+    created_by: discovery.project_scan
+
+  migration_context:
+    path: "docs/0-DISCOVERY/MIGRATION-CONTEXT.md"
+    created_by: discovery.context_interview
+
+  migration_plan:
+    path: "MIGRATION-PLAN.md"
+    created_by: planning.detailed_planning
+
+  claude_md:
+    path: "CLAUDE.md"
+    created_by: execution.create_core_files
+
+  project_state:
+    path: "PROJECT-STATE.md"
+    created_by: execution.create_core_files
+
+  workspaces:
+    path: ".claude/agents/workspaces/"
+    created_by: execution.generate_workspaces
+
+  cicd_pipeline:
+    path: ".github/workflows/"
+    created_by: execution.infrastructure_setup
+
+  deployment_guide:
+    path: "docs/deployment/deployment-guide.md"
+    created_by: execution.infrastructure_setup
+
+  docker_config:
+    path: "Dockerfile"
+    created_by: execution.infrastructure_setup
